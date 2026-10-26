@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SakuraView · 示例库 · アカネ · SakuraView</title><link rel="stylesheet" href="assets/style.css?v=6f9639d2"></head><body>
+<aside>
+  <div class="brand"><div class="mark">&#127800; SakuraView</div><h1>SakuraView · 示例库</h1><p>50 FILES · 8 GROUPS</p></div>
+  <div class="snav" id="navbox"></div>
+</aside>
+<div id="mainWrap">
+<div class="navbar">
+  <a class="back" href="index.html">&#8592; 目录</a>
+  <div class="crumb"><b>立绘</b> / アカネ</div>
+  <div class="spacer"></div>
+  <a class="back" href="fav.html">&#9829; 收藏</a>
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8892a6" stroke-width="2">
+      <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" placeholder="搜索文件名…" autocomplete="off" spellcheck="false">
+  </div>
+<div class="chips" id="orientChips"><a class="chip on" data-o="">全部</a><a class="chip" data-o="l">横图</a><a class="chip" data-o="p">竖图</a><a class="chip" id="dupChip" title="默认把同一场景的差分叠成一张；点这里展开成平铺">叠起差分 1 组</a></div>
+</div>
+<div class="wrap"><div class="cat-title" style="margin-bottom:16px">アカネ <em>8 个</em></div><div class="masonry" id="grid"></div></div>
+</div>
+<div class="vlb" id="vlb">
+  <video id="vPlayer" playsinline></video>
+  <div class="vtitle" id="vName"></div>
+  <div class="vmenu" id="vMenu"></div>
+  <div class="vsprite" id="vSprite"><i id="vSpriteT"></i></div>
+  <div class="vui">
+    <div class="vbarwrap" id="vBarWrap"><div class="vbar" id="vBar"></div></div>
+    <div class="vrow">
+      <button class="vi" id="vPrev" title="上一个">&#9198;</button>
+      <button class="vi" id="vPlay" title="播放" aria-label="播放 / 暂停"><svg class="ic ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z"/></svg><svg class="ic ic-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.6" y="5.2" width="3.8" height="13.6" rx="1.1"/><rect x="13.6" y="5.2" width="3.8" height="13.6" rx="1.1"/></svg></button>
+      <button class="vi" id="vNext" title="下一个">&#9197;</button>
+      <span class="vtime" id="vTime">0:00 / 0:00</span>
+      <div class="vspacer"></div>
+      <button class="vi vrate" id="vRate" title="播放速度">1x</button>
+      <button class="vi" id="vPlayMode" title="连播/循环：关（点击开启连播）">单集</button>
+      <span class="vvol" id="vVolWrap">
+        <span class="vvic" id="vVolIcon" aria-hidden="true">&#128266;</span>
+        <input id="vVol" type="range" min="0" max="100" step="1" value="100" aria-label="音量">
+      </span>
+      <button class="vi" id="vShot" title="截图当前画面（PNG）">&#128247;</button>
+      <button class="vi" id="vPip" title="画中画">&#10697;</button>
+      <button class="vi" id="vFull" title="全屏">&#9974;</button>
+      <button class="vi" id="vClose" title="关闭">&#10005;</button>
+    </div>
+  </div>
+</div>
+<div class="lb" id="lb">
+  <div class="lb-bar"><b id="lbName"></b><span id="lbIdx"></span></div>
+  <img id="lbImg" alt="">
+  <div class="lb-acts">
+    <button class="lb-act" id="lbFav">&#9825; 收藏</button>
+    <button class="lb-act" id="lbRot" title="旋转 90°（R）">&#8635; 旋转</button>
+    <span class="lbspd">
+      <button class="lb-act" id="lbPlay" title="幻灯片放映（空格）">&#9654; 幻灯</button>
+      <button class="lb-act lbcaret" id="lbSpd" title="放映速率"><span id="lbSpdMs">16ms</span> ▾</button>
+    </span>
+    <button class="lb-act" id="lbNote">&#128172; 备注</button>
+  </div>
+      <div class="spdmenu" id="spdMenu"></div>
+  <button class="lb-btn lb-prev" id="lbPrev">&#8249;</button>
+  <button class="lb-btn lb-next" id="lbNext">&#8250;</button>
+  <button class="lb-close" id="lbClose">&#10005;</button>
+</div>
+<div class="selband" id="selBand"></div>
+<div class="selbar" id="selBar">
+  <b><span id="selN">0</span> 已选</b>
+  <button id="selAll" title="选中当前筛选结果里的全部">全选</button>
+  <button class="primary" id="selFav">&#9829; 收藏</button>
+  <input id="selTag" placeholder="标签（空格分隔）" maxlength="80">
+  <button id="selTagApply">加标签</button>
+  <button id="selClear">清空</button>
+</div>
+<div class="modal" id="shotTip"><div class="modal-box">
+  <h3>&#128247; 截图在 file:// 下用不了</h3>
+  <p class="tip-p">浏览器把本地视频当成<b>跨源资源</b>，禁止把画面导出成图片（控制台会报
+  <code>Tainted canvases may not be exported</code>）。这是安全策略，不是文件坏了，也不是按钮没接上。</p>
+  <p class="tip-p">想用截图：在工具包目录跑一次 <code>python serve_site.py</code>，按提示用
+  <code>http://127.0.0.1:8765/…</code> 打开图库——截图、画中画、播放位置记忆都会正常。</p>
+  <div class="modal-acts"><button class="primary" id="shotTipOk">知道了</button></div>
+</div></div>
+<div class="modal" id="noteModal"><div class="modal-box">
+  <h3>&#128172; 备注</h3>
+  <img class="modal-thumb" id="modalThumb" alt="">
+  <textarea id="noteInput" placeholder="给这张图写点什么…（最多 200 字）" maxlength="200"></textarea>
+  <input id="tagInput" placeholder="标签（空格分隔，最多 8 个，如：名场面 海边）" maxlength="120">  <div class="modal-acts">
+    <button class="danger" id="noteDel">删除</button>
+    <button id="noteCancel">取消</button>
+    <button class="primary" id="noteSave">保存</button>
+  </div>
+</div></div>
+<div class="dupPanel" id="dupPanel"><div class="dp-box">
+  <h4><span id="dpTitle">差分速览</span><span class="dp-close" id="dpClose">&#215;</span></h4>
+  <div class="dp-sub" id="dpSub"></div>
+  <div class="dp-grid" id="dpGrid"></div>
+</div></div>
+<script src="assets/nav.js?v=9c50f351"></script>
+<script>window.PAGE={"items":[["立绘/アカネ/アカネ_制服_01.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_02.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_03.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_04.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_05.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_06.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_07.jpg",720,1080,0],["立绘/アカネ/アカネ_制服_08.jpg",720,1080,0]]};</script>
+<script src="assets/app.js?v=49ddf31b"></script>
+</body></html>
