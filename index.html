@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SakuraView · Galgame CG 图库生成器</title>
+<meta name="description" content="把 Galgame 的 CG 从各家引擎的打包文件里解出来，生成零依赖、双击即看的静态图库。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<style>
+  :root{
+    --bg:#0a0b0f; --card:#151821; --line:#222733; --text:#e9ecf3; --muted:#79839a;
+    --accent:#6f8cff; --accent2:#a77bff; --fav:#ff5b8c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text); min-height:100vh;
+    font:14px/1.7 "Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(900px 520px at 10% -12%, rgba(111,140,255,.16), transparent 62%),
+      radial-gradient(720px 420px at 92% -4%, rgba(167,123,255,.12), transparent 62%),
+      radial-gradient(760px 520px at 50% 108%, rgba(255,91,140,.07), transparent 62%);
+  }
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 26px}
+
+  /* ── 首屏 ── */
+  header{padding:104px 0 64px; text-align:center}
+  .sakura{font-size:40px; line-height:1; margin-bottom:22px; display:block}
+  h1{
+    font-size:clamp(38px,6.4vw,64px); font-weight:800; letter-spacing:-.02em; line-height:1.1;
+    background:linear-gradient(102deg,#fff 10%,#9db0ff 52%,#c6a8ff 76%,#ff9ab6 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tagline{margin-top:20px; font-size:clamp(14px,2vw,17px); color:#b9c2d6; line-height:1.85}
+  .tagline b{color:#fff; font-weight:600}
+  .badges{margin-top:26px; display:flex; gap:9px; justify-content:center; flex-wrap:wrap}
+  .badge{
+    font-size:12px; padding:5px 12px; border-radius:99px; color:#9aa6bf;
+    border:1px solid var(--line); background:#101319;
+  }
+  .badge.hot{color:#ffb3c6; border-color:rgba(255,91,140,.32); background:rgba(255,91,140,.07)}
+
+  .cta{margin-top:38px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; gap:9px; padding:13px 30px; border-radius:11px;
+    font-size:15px; font-weight:700; transition:.18s; border:1px solid transparent;
+  }
+  .btn.primary{
+    color:#0a0b0f; background:linear-gradient(100deg,#ffffff,#d6ddff 60%,#ffc3d4);
+    box-shadow:0 10px 34px -12px rgba(160,180,255,.55);
+  }
+  .btn.primary:hover{transform:translateY(-2px); box-shadow:0 16px 40px -12px rgba(160,180,255,.7)}
+  .btn.ghost{color:#cfd7e8; border-color:var(--line); background:#12151d}
+  .btn.ghost:hover{background:#1b2231; color:#fff; border-color:rgba(111,140,255,.5); transform:translateY(-2px)}
+
+  /* ── 截图 ── */
+  .shots{margin:78px 0 0; display:grid; gap:18px}
+  .shot{
+    border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card);
+    transition:.2s; display:block;
+  }
+  .shot:hover{border-color:rgba(111,140,255,.45); transform:translateY(-3px);
+    box-shadow:0 22px 50px -24px rgba(0,0,0,.9)}
+  .shot img{display:block; width:100%; height:auto}
+  .shot .cap{
+    padding:11px 16px; font-size:12.5px; color:var(--muted);
+    border-top:1px solid var(--line); display:flex; align-items:center; gap:8px;
+  }
+  .shot .cap b{color:#dfe4f0; font-weight:600}
+  .shot .cap .dot{width:6px; height:6px; border-radius:50%; background:var(--fav); flex:none}
+  .shots .row2{display:grid; gap:18px; grid-template-columns:1fr 1fr}
+  @media (max-width:720px){ .shots .row2{grid-template-columns:1fr} }
+
+  /* ── 特性 ── */
+  section{padding:86px 0 0}
+  h2{
+    font-size:13px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:28px; display:flex; align-items:center; gap:14px;
+  }
+  h2::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent)}
+  .grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(255px,1fr))}
+  .card{
+    padding:22px 22px 20px; border-radius:13px; border:1px solid var(--line); background:var(--card);
+    transition:.18s;
+  }
+  .card:hover{border-color:rgba(111,140,255,.35); background:#171b26}
+  .card .ico{font-size:19px; margin-bottom:11px; display:block}
+  .card h3{font-size:14.5px; font-weight:700; margin-bottom:7px; color:#eef1f8}
+  .card p{font-size:12.8px; color:var(--muted); line-height:1.75}
+
+  /* ── 引擎 ── */
+  .engines{display:flex; flex-wrap:wrap; gap:10px}
+  .eng{
+    font-size:12.5px; padding:8px 15px; border-radius:9px; color:#c3cde2;
+    border:1px solid var(--line); background:#12151d;
+  }
+  .eng span{color:#7f8ba4; font-size:11.5px; margin-left:7px}
+
+  /* ── 页脚 ── */
+  footer{
+    margin-top:96px; padding:34px 0 54px; border-top:1px solid var(--line);
+    color:#5d6679; font-size:12.2px; line-height:1.9;
+  }
+  footer a{color:#8f9bb5; border-bottom:1px solid rgba(143,155,181,.25)}
+  footer a:hover{color:#c9d4ea}
+  .warn{color:#7a6552; margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="sakura">🌸</span>
+    <h1>SakuraView</h1>
+    <p class="tagline">
+      把 Galgame 的 CG 从各家引擎的打包文件里解出来，<br>
+      生成<b>零依赖、双击即看</b>的静态图库。
+    </p>
+    <div class="badges">
+      <span class="badge">纯 file:// 可用</span>
+      <span class="badge">无 Node / 无构建</span>
+      <span class="badge">单库十万张</span>
+      <span class="badge hot">示例素材全部程序合成</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="demo/CG/index.html">进入示例库 →</a>
+      <a class="btn ghost" href="https://github.com/hongcheng343432121/SakuraView">GitHub 源码</a>
+    </div>
+  </header>
+
+  <div class="shots">
+    <a class="shot" href="demo/CG/index.html">
+      <img src="docs/screenshots/01-index.png" alt="目录页：按分类分组，卡片带缩略图">
+      <div class="cap"><span class="dot"></span><b>目录页</b> · 分类色块 + 分组卡片 + 按组名搜索</div>
+    </a>
+    <div class="row2">
+      <a class="shot" href="demo/CG/p01.html">
+        <img src="docs/screenshots/02-group.png" alt="分组页：图片网格">
+        <div class="cap"><span class="dot"></span><b>分组页</b> · 横/竖/视频筛选 + 批量框选</div>
+      </a>
+      <a class="shot" href="demo/CG/p08.html">
+        <img src="docs/screenshots/03-video.png" alt="视频页：自制播放器">
+        <div class="cap"><span class="dot"></span><b>视频页</b> · 倍速 / 循环 / 连播 / 雪碧图预览</div>
+      </a>
+    </div>
+  </div>
+
+  <section>
+    <h2>它做什么</h2>
+    <div class="grid">
+      <div class="card">
+        <span class="ico">🔓</span>
+        <h3>解包</h3>
+        <p>Ren'Py 的 <code>.rpa</code>、QLIE 的 <code>FilePackVer3.0/3.1</code>、Godot 的 <code>.pck</code> 都能直接解，Unity 走 AssetStudio 导出纹理。</p>
+      </div>
+      <div class="card">
+        <span class="ico">🗂️</span>
+        <h3>整理</h3>
+        <p>按目录名自动归类成「事件CG / 立绘 / 头像 / 动画」；一个都认不出时按「目录即分类」兜底，不会一张图都收不到。</p>
+      </div>
+      <div class="card">
+        <span class="ico">🖼️</span>
+        <h3>看图</h3>
+        <p>灯箱 → 真全屏，滚轮/双指缩放、拖拽平移、<kbd>R</kbd> 旋转，<b>每张图的缩放按图记忆</b>，退出后自动滚回那一张。</p>
+      </div>
+      <div class="card">
+        <span class="ico">⭐</span>
+        <h3>收藏与备注</h3>
+        <p>收藏倒序、行内备注（支持 <code>**粗体**</code> / <code>#标签</code>）、轻量标签、导出导入 JSON 备份。</p>
+      </div>
+      <div class="card">
+        <span class="ico">🎬</span>
+        <h3>视频</h3>
+        <p>自制播放器：倍速、循环、连播、音量滑块、画中画、播放位置记忆，进度条用预生成的雪碧图做预览。</p>
+      </div>
+      <div class="card">
+        <span class="ico">⚡</span>
+        <h3>增量重建</h3>
+        <p>按 CG 目录指纹判断，没变的库直接跳过；全部没变化时 0.6 秒返回。自检脚本一次查完裂图、缩略图、海报帧。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>支持的引擎</h2>
+    <div class="engines">
+      <div class="eng">Ren'Py<span>.rpa</span></div>
+      <div class="eng">QLIE<span>FilePackVer 3.0 / 3.1</span></div>
+      <div class="eng">Godot<span>.pck</span></div>
+      <div class="eng">Unity<span>AssetStudio 导出纹理</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>怎么用</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>① 装 Python 3.11+</h3>
+        <p>安装时勾选 <b>Add python.exe to PATH</b>。还没打包成 exe，脚本会自己检查并提示。</p>
+      </div>
+      <div class="card">
+        <h3>② 把游戏文件夹拖到 一键处理.bat</h3>
+        <p>识别引擎 → 解包 → 整理 → 建站 → 转视频/抽海报/生成缩略图 → 登记总收藏 → 打开浏览器，一条龙。</p>
+      </div>
+      <div class="card">
+        <h3>③ 等它跑完</h3>
+        <p>产物是 <code>CG\index.html</code>，直接双击。之后往目录里加删图片，用 <code>rebuild_all.py</code> 增量重建。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      示例库的每一张图都是 <code>make_demo.py</code> 用 Pillow 现画的，两段动画是 ffmpeg 现合成的，
+      不含任何商业游戏素材。
+    </p>
+    <p class="warn">
+      本工具不内置任何游戏密钥，也不分发第三方解包器。请仅对自己合法持有的游戏使用，提取出的素材请勿传播或商用。
+    </p>
+    <p style="margin-top:14px">
+      <a href="https://github.com/hongcheng343432121/SakuraView">GitHub</a> ·
+      <a href="https://github.com/hongcheng343432121/SakuraView/blob/main/LICENSE">MIT License</a>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
