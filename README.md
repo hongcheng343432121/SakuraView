@@ -98,6 +98,7 @@ python verify_libs.py [key] [--videos] :: 自检：入口/裂图/海报/缩略�
 ## 目录结构
 
 ```
+DESIGN.md             界面设计规范（配色/字号/间距/动效的硬约束，改 UI 前先读）
 gen_site_generic.py   唯一真相：扫描 CG 目录 → 生成站点
 build_jing.py         通用整理器（按目录名归类 + 认不出时按「目录即分类」兜底）
 oneclick.py           一键流程（识别 → 解包 → 整理 → 建站 → 媒体 → Hub）

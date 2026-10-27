@@ -188,7 +188,8 @@ print("目录:", CG)
 print("文件:", total, " 分组:", len(keys))
 
 # ---------- CSS ----------
-CSS = """:root{--bg:#06080c;--card:#0c1017;--line:#242a37;--line2:#39424f;--text:#e6e9f0;--muted:#767f92;
+CSS = """:root{--bg:#06080c;--card:#0c1017;--line:#242a37;--line2:#39424f;
+--text:#e9ebf1;--muted:#98a1b2;--faint:#5c6474;
 --accent:#d3b184;--accent2:#8c7c63;--fav:#e8759a}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scrollbar-color:#eef2fa #0b0d12;scrollbar-gutter:stable}
