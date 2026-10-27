@@ -117,7 +117,16 @@ animation: 循环漂浮          /* 除背景氛围层外 */
 ## 6. 组件
 
 **按钮**
-细线框 + 文字，`border: 1px solid var(--line2)`，hover 只变边框色和底色，不做填充式高亮。
+细线框 + 文字，不做填充式高亮、不加发光。
+
+| 状态 | 边框 | 底色 |
+|---|---|---|
+| 静止 | `var(--line2)` | `var(--card)` |
+| hover | `var(--faint)` | `var(--card)`（不变深，只提亮） |
+| focus | `var(--accent)` | — |
+
+焦点环**不要**用 `box-shadow: 0 0 0 3px`（那是 AI 模板的默认写法），只改 `border-color`。
+「收藏」「最近查看」这类功能性按钮可以用 `var(--fav)` 做图标色，但**边框不许**跟着变粉。
 
 **卡片（图库 `.card` / `.item`）**
 `background: var(--card)`、`border: 1px solid var(--line)`、`border-radius: 2px`。
