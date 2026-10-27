@@ -34,7 +34,8 @@
 | `--faint` | `--faint` | `#5c6474` | 元信息、编号、占位 |
 | `--accent` | — | `#d3b184` | 链接、选中、进度条 |
 | `--accent2` | — | `#8c7c63` | 强调色的暗调（少用） |
-| `--fav` | `--pink` | `#e8759a` | **只给收藏 / 最近查看 / 未读标记** |
+| `--fav` | `--pink` | `#e8759a` | **只给收藏 / 批量选中 / 最近查看 / 侧栏当前项** |
+| `--fav-soft` | — | `#ffb7c5` | 上面几项的浅色版（分类头指示条、seen 描边、计数强调） |
 
 **规则**
 
@@ -114,32 +115,52 @@ animation: 循环漂浮          /* 除背景氛围层外 */
 
 ---
 
-## 6. 组件
+## 6. 组件状态矩阵
 
-**按钮**
-细线框 + 文字，不做填充式高亮、不加发光。
+**下面每个值都是从 `gen_site_generic.py` 的 CSS 里读出来的实况，不是理想值。**
+改任何组件前先查表；新增状态也要先加进表里，否则代码和规范会各说各话。
 
-| 状态 | 边框 | 底色 |
+### 6.1 按钮与控件
+
+| 组件 | 静止 | hover | 选中 / 激活 | 禁用 |
+|---|---|---|---|---|
+| `.back` 返回 | 框 `--line2` · 底 `--card` · 字 `--text` | 框 `--faint` · 字 `#fff` | — | — |
+| `.chip` 筛选 | 框 `--line2` · 底 `--card` · 字 `--text` | 框 `--faint` · 字 `#fff` | `.on` 底 `rgba(232,117,154,.22)` · 字 `#fff` | — |
+| `.search input` | 框 `--line` · 底 `--card` | — | `:focus` 框 `--accent`，**无 box-shadow** | — |
+| `.selbar button` 批量条 | 框 `--line2` · 底 `--card` | 框 `--faint` · 字 `#fff` | `.primary` 底 `--accent` · 字 `#14110c` | — |
+| `.modal-acts button` 弹窗 | 框 `--line2` · 底 `--card` | 底 `#20283a` · 字 `#fff` | `.primary` 底 `--accent` 字 `#14110c`；`.danger` 字 `#ff9db6` | — |
+| `.vi` 播放器图标 | 底 透明 · 字 `--text` | 底 `rgba(255,255,255,.16)` | `.on` 底 `rgba(232,117,154,.85)` · 字 `#fff` | `opacity:.3` |
+
+### 6.2 容器
+
+| 组件 | 静止 | hover | 特殊态 |
+|---|---|---|---|
+| `.card` 分组卡 | 框 `--line` · 底 `--card` · 圆角 2px | 框 `--line2` | — |
+| `.item` 图块 | 框 `--line` · 底 `--card` | 框 `--line2` · 图 `brightness(1.10)` | `.fav` `outline 1px --fav`（-1px 内缩）<br>`.sel` `outline 2px --fav`（-2px）<br>`.seen` `outline 2px --fav-soft` |
+| `.nav-item` 侧栏项 | 框 透明 · 字 `--text` | 底 `--line` · 字 `#fff` | `.on` 底 `rgba(232,117,154,.14)` + `inset 2px 0 0 --fav` |
+| `.cat-h` 分类头 | 左 2px `--fav` · 下边线 `--line` · 字 `#cfd6e4` | 字 `#fff` · 下边线 `--line2` | 展开时箭头 `rotate(90deg)` |
+| `.modal-box` 弹窗 | 框 `--line2` · 底 `--card` · 圆角 2px | — | 遮罩 `rgba(5,6,9,.8)` |
+| `.selbar` 批量条 | 框 `--line2` · 底 `rgba(18,22,31,.97)` · **无阴影** | — | 打开时 `translate(-50%,0)`（功能性进出场） |
+
+### 6.3 三条硬规则
+
+1. **`outline` 一律带负的 `outline-offset`**（画在框内侧）。用 `box-shadow: 0 0 0 Npx` 冒充描边是禁止的——
+   那会让元素看起来「浮」出布局。
+2. **粉色 `--fav` / `--fav-soft` 只允许出现在**：收藏态、批量选中、最近查看、侧栏当前项、
+   分类头左侧指示条、播放器「已启用」态。**其他按钮边框、hover 高亮一律不许用粉色。**
+3. **判定顺序**：先看能不能用 `--line → --line2 → --faint` 三个灰阶表达，表达不了才动 `--accent`，
+   最后才轮到 `--fav`。颜色越靠后，用得越少。
+
+### 6.4 落地页（`index.html`）
+
+| 组件 | 静止 | hover |
 |---|---|---|
-| 静止 | `var(--line2)` | `var(--card)` |
-| hover | `var(--faint)` | `var(--card)`（不变深，只提亮） |
-| focus | `var(--accent)` | — |
+| `.btn` 主按钮 | 框 `--line2` · 底 `rgba(255,255,255,.02)` | 框 `--faint` · 字 `#fff` · 内层径向高光 `opacity` 0→1 |
+| `.link` 文字链 | 下划线 `--line2` · 字 `--dim` | 下划线 `#fff` · 字 `#fff` |
+| `figure.plate` 图版 | 框 `--line` · 图 `saturate(.8) brightness(.9)` | 框 `--line2` · 图 `saturate(.92) brightness(.98)` |
 
-焦点环**不要**用 `box-shadow: 0 0 0 3px`（那是 AI 模板的默认写法），只改 `border-color`。
-「收藏」「最近查看」这类功能性按钮可以用 `var(--fav)` 做图标色，但**边框不许**跟着变粉。
-
-**卡片（图库 `.card` / `.item`）**
-`background: var(--card)`、`border: 1px solid var(--line)`、`border-radius: 2px`。
-hover 只改 `border-color` 和图的 `brightness`，不位移不缩放。
-
-**图版（落地页 `figure.plate`）**
-图在上、`figcaption` 在下、两者之间一条 `1px var(--line)` 分隔。caption **不许压在图上**。
-
-**侧栏分类头（`.cat-h`）**
-左侧 `2px` 樱花粉竖线 + 下面一条分隔线。**不许整块渐变背景**。
-
-**空态**
-细字重 + 等宽编号，不用大图标不用 emoji。
+落地页的按钮允许一层 `radial-gradient` 做 hover 高光（**唯一豁免**），因为首屏背景是剧照、
+纯边框变化在暗部看不出来。图库界面没有这个豁免。
 
 ---
 
