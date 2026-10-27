@@ -8,185 +8,380 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
 <style>
   :root{
-    --bg:#0a0b0f; --card:#151821; --line:#222733; --text:#e9ecf3; --muted:#79839a;
-    --accent:#6f8cff; --accent2:#a77bff; --fav:#ff5b8c;
+    --ink:#03050a;
+    --text:#e8ebf2;
+    --dim:#9fa8bb;
+    --faint:#5a6274;
+    --cool:#86abdf;
+    --warm:#e8b183;
+    --line:rgba(255,255,255,.07);
+    --line2:rgba(255,255,255,.16);
+    --sans:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    --serif:Georgia,"Songti SC",serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
-    background:var(--bg); color:var(--text); min-height:100vh;
-    font:14px/1.7 "Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    background:var(--ink); color:var(--text); min-height:100vh; overflow-x:hidden;
+    font:15px/1.85 var(--sans); -webkit-font-smoothing:antialiased;
   }
-  body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  a{color:inherit;text-decoration:none}
+
+  /* ══ 背景：剧照 · 雾 · 光斑 · 暗角 · 颗粒 ══════════ */
+  .bg,.fog,.bokeh,.vig,.grain{position:fixed;inset:0;pointer-events:none}
+
+  /* 剧照层：拿一张示例 CG 当"场景底"，重度压暗+虚化，只留氛围 */
+  .bg{
+    z-index:0;
+    background:url("demo/CG/事件CG/第01幕/demo_c01_05.jpg") center 52%/cover no-repeat;
+    filter:brightness(.46) saturate(.52) blur(4px);
+    opacity:.95;
+  }
+  /* 压一层从下往上的黑，让文字永远压得住；中间留一线，别把画面全埋了 */
+  .bg::after{
+    content:""; position:absolute; inset:0;
     background:
-      radial-gradient(900px 520px at 10% -12%, rgba(111,140,255,.16), transparent 62%),
-      radial-gradient(720px 420px at 92% -4%, rgba(167,123,255,.12), transparent 62%),
-      radial-gradient(760px 520px at 50% 108%, rgba(255,91,140,.07), transparent 62%);
+      linear-gradient(96deg, rgba(3,5,10,.94) 0%, rgba(3,5,10,.80) 34%, rgba(3,5,10,.46) 58%, rgba(3,5,10,.30) 100%),
+      linear-gradient(180deg, rgba(3,5,10,.60) 0%, transparent 24%, rgba(3,5,10,.42) 72%, var(--ink) 98%);
   }
-  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 26px}
 
-  /* ── 首屏 ── */
-  header{padding:104px 0 64px; text-align:center}
-  .sakura{font-size:40px; line-height:1; margin-bottom:22px; display:block}
+  /* 雾：三团大范围径向渐变，缓慢漂 */
+  .fog{z-index:1;opacity:.9}
+  .fog i{position:absolute;inset:-25%;display:block;will-change:transform}
+  .fog i:nth-child(1){
+    background:radial-gradient(46% 40% at 24% 22%, rgba(110,150,215,.20), transparent 68%);
+    animation:driftA 54s ease-in-out infinite alternate;
+  }
+  .fog i:nth-child(2){
+    background:radial-gradient(40% 36% at 80% 24%, rgba(220,150,95,.13), transparent 70%);
+    animation:driftB 68s ease-in-out infinite alternate;
+  }
+  .fog i:nth-child(3){
+    background:radial-gradient(55% 46% at 50% 108%, rgba(190,214,250,.09), transparent 72%);
+    animation:driftA 82s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes driftA{from{transform:translate3d(-2.4%,-1.6%,0) scale(1)}to{transform:translate3d(2.8%,2.2%,0) scale(1.1)}}
+  @keyframes driftB{from{transform:translate3d(2%,1.4%,0) scale(1.06)}to{transform:translate3d(-2.6%,-2%,0) scale(1)}}
+
+  /* 光斑：远景小点（吊灯串）+ 近景大光斑，全部 blur，慢速漂浮 */
+  .bokeh{z-index:1}
+  .bokeh i{
+    position:absolute; display:block; border-radius:50%;
+    animation:bob 22s ease-in-out infinite alternate;
+  }
+  @keyframes bob{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-26px,0)}}
+
+  .vig{
+    z-index:2;
+    background:
+      radial-gradient(120% 88% at 50% 36%, transparent 32%, rgba(0,0,0,.55) 78%, rgba(0,0,0,.85) 100%);
+  }
+  .grain{
+    z-index:3; opacity:.055; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{position:relative;z-index:4;max-width:1140px;margin:0 auto;padding:0 34px}
+
+  /* ══ Hero ═════════════════════════════════════ */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+    padding:110px 0 130px; position:relative;
+  }
+  /* 片尾那种「细线 + 大写 + 宽字距」的标识组合 */
+  .mark{
+    display:flex; align-items:center; gap:16px; margin-bottom:40px;
+    font-size:10.5px; letter-spacing:.42em; text-transform:uppercase; color:#7c869c;
+    animation:rise 1s .05s both;
+  }
+  .mark::before,.mark::after{content:""; height:1px; flex:1; max-width:74px;
+    background:linear-gradient(90deg,transparent,var(--line2))}
+  .mark::after{background:linear-gradient(90deg,var(--line2),transparent)}
+  .mark b{color:#c9d6ee; font-weight:500; letter-spacing:.34em}
+  .mark i{width:1px; height:11px; background:var(--line2); display:block}
+
   h1{
-    font-size:clamp(38px,6.4vw,64px); font-weight:800; letter-spacing:-.02em; line-height:1.1;
-    background:linear-gradient(102deg,#fff 10%,#9db0ff 52%,#c6a8ff 76%,#ff9ab6 100%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    font-family:var(--sans); font-weight:800; letter-spacing:-.035em;
+    font-size:clamp(52px,9.2vw,112px); line-height:.94; color:#fff;
+    text-shadow:0 0 120px rgba(150,185,240,.35), 0 0 40px rgba(150,185,240,.14);
+    animation:rise 1.2s .1s both;
   }
-  .tagline{margin-top:20px; font-size:clamp(14px,2vw,17px); color:#b9c2d6; line-height:1.85}
-  .tagline b{color:#fff; font-weight:600}
-  .badges{margin-top:26px; display:flex; gap:9px; justify-content:center; flex-wrap:wrap}
-  .badge{
-    font-size:12px; padding:5px 12px; border-radius:99px; color:#9aa6bf;
-    border:1px solid var(--line); background:#101319;
+  .lede{
+    margin-top:38px; max-width:46ch; font-size:clamp(15px,1.5vw,17px);
+    color:#b3bccf; line-height:2;
+    animation:rise 1s .26s both;
   }
-  .badge.hot{color:#ffb3c6; border-color:rgba(255,91,140,.32); background:rgba(255,91,140,.07)}
+  .lede b{color:#fff; font-weight:600}
+  .lede em{font-style:normal; color:var(--warm)}
 
-  .cta{margin-top:38px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+  .meta{
+    margin-top:34px; display:flex; flex-wrap:wrap; gap:10px 30px;
+    font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint);
+    animation:rise 1s .36s both;
+  }
+  .meta span{display:flex; align-items:center; gap:9px}
+  .meta span::before{
+    content:""; width:4px; height:4px; border-radius:50%; background:var(--warm);
+    box-shadow:0 0 12px rgba(232,177,131,.95);
+  }
+
+  .cta{margin-top:56px; display:flex; align-items:center; gap:34px; flex-wrap:wrap;
+       animation:rise 1s .46s both}
   .btn{
-    display:inline-flex; align-items:center; gap:9px; padding:13px 30px; border-radius:11px;
-    font-size:15px; font-weight:700; transition:.18s; border:1px solid transparent;
+    display:inline-flex; align-items:center; gap:12px; padding:16px 38px;
+    font-size:13.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:#eef2fa; border:1px solid rgba(255,255,255,.34); border-radius:1px;
+    background:rgba(255,255,255,.03); position:relative; overflow:hidden;
+    transition:.4s cubic-bezier(.4,0,.2,1); backdrop-filter:blur(3px);
   }
-  .btn.primary{
-    color:#0a0b0f; background:linear-gradient(100deg,#ffffff,#d6ddff 60%,#ffc3d4);
-    box-shadow:0 10px 34px -12px rgba(160,180,255,.55);
+  .btn::after{
+    content:""; position:absolute; inset:-1px; opacity:0; transition:.4s;
+    background:radial-gradient(120% 130% at 50% 120%, rgba(200,220,255,.45), transparent 70%);
   }
-  .btn.primary:hover{transform:translateY(-2px); box-shadow:0 16px 40px -12px rgba(160,180,255,.7)}
-  .btn.ghost{color:#cfd7e8; border-color:var(--line); background:#12151d}
-  .btn.ghost:hover{background:#1b2231; color:#fff; border-color:rgba(111,140,255,.5); transform:translateY(-2px)}
+  .btn:hover{border-color:#fff; color:#fff; box-shadow:0 0 60px -12px rgba(180,205,255,.65)}
+  .btn:hover::after{opacity:1}
+  .btn .arw{transition:transform .4s}
+  .btn:hover .arw{transform:translateX(6px)}
+  .link{
+    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:#8b95ab;
+    border-bottom:1px solid rgba(139,149,171,.3); padding-bottom:3px; transition:.3s;
+  }
+  .link:hover{color:#e6ecf8; border-color:rgba(230,236,248,.7)}
 
-  /* ── 截图 ── */
-  .shots{margin:78px 0 0; display:grid; gap:18px}
+  /* 滚动提示 */
+  .scroll{
+    position:absolute; left:50%; bottom:38px; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    font-size:9.5px; letter-spacing:.38em; text-transform:uppercase; color:#4e5666;
+    animation:fadeIn 1.4s 1.2s both;
+  }
+  .scroll::after{
+    content:""; width:1px; height:44px;
+    background:linear-gradient(180deg,rgba(255,255,255,.32),transparent);
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+  /* ══ 剧照区 ═══════════════════════════════════ */
+  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--line2) 15%,var(--line2) 85%,transparent)}
+
+  .shots{padding:100px 0 0}
   .shot{
-    border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card);
-    transition:.2s; display:block;
+    display:block; position:relative; overflow:hidden;
+    border:1px solid var(--line); background:#06080d;
+    transition:.5s cubic-bezier(.4,0,.2,1);
   }
-  .shot:hover{border-color:rgba(111,140,255,.45); transform:translateY(-3px);
-    box-shadow:0 22px 50px -24px rgba(0,0,0,.9)}
-  .shot img{display:block; width:100%; height:auto}
+  /* 低饱和 + 强暗角：让截图像"剧照"而不是"网页截图" */
+  .shot img{
+    display:block; width:100%; height:auto;
+    filter:saturate(.74) brightness(.86) contrast(1.08);
+    transition:.5s cubic-bezier(.4,0,.2,1);
+  }
+  .shot::after{
+    content:""; position:absolute; inset:0; pointer-events:none; transition:.5s;
+    box-shadow:inset 0 0 120px rgba(0,0,0,.75), inset 0 0 40px rgba(0,0,0,.45);
+    background:linear-gradient(180deg,rgba(3,5,10,.35),transparent 22%,transparent 62%,rgba(3,5,10,.55));
+  }
+  .shot:hover{border-color:rgba(190,215,255,.4); transform:translateY(-5px)}
+  .shot:hover img{filter:saturate(.98) brightness(1.02) contrast(1.03); transform:scale(1.012)}
+  .shot:hover::after{box-shadow:inset 0 0 70px rgba(0,0,0,.3)}
   .shot .cap{
-    padding:11px 16px; font-size:12.5px; color:var(--muted);
-    border-top:1px solid var(--line); display:flex; align-items:center; gap:8px;
+    position:absolute; left:0; right:0; bottom:0; z-index:2; padding:40px 26px 20px;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    background:linear-gradient(0deg,rgba(2,4,8,.95),rgba(2,4,8,.5) 58%,transparent);
   }
-  .shot .cap b{color:#dfe4f0; font-weight:600}
-  .shot .cap .dot{width:6px; height:6px; border-radius:50%; background:var(--fav); flex:none}
-  .shots .row2{display:grid; gap:18px; grid-template-columns:1fr 1fr}
-  @media (max-width:720px){ .shots .row2{grid-template-columns:1fr} }
+  .shot .cap b{
+    font-size:12px; font-weight:700; letter-spacing:.26em; text-transform:uppercase; color:#f0f4fc;
+  }
+  .shot .cap i{font-style:normal; font-size:11.5px; letter-spacing:.06em; color:#8b93a6}
+  .shots .duo{display:grid; gap:22px; grid-template-columns:1fr 1fr; margin-top:22px}
+  @media(max-width:780px){.shots .duo{grid-template-columns:1fr}}
 
-  /* ── 特性 ── */
-  section{padding:86px 0 0}
-  h2{
-    font-size:13px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
-    color:var(--muted); margin-bottom:28px; display:flex; align-items:center; gap:14px;
+  /* ══ 章节 ═════════════════════════════════════ */
+  section{padding:104px 0 0}
+  .head{display:flex; align-items:baseline; gap:18px; margin-bottom:50px}
+  .head .num{font-family:var(--serif); font-size:11px; letter-spacing:.24em; color:#4e5666}
+  .head h2{
+    font-size:clamp(22px,2.8vw,30px); font-weight:800; letter-spacing:-.01em; color:#eef2fa;
   }
-  h2::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent)}
-  .grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(255px,1fr))}
-  .card{
-    padding:22px 22px 20px; border-radius:13px; border:1px solid var(--line); background:var(--card);
-    transition:.18s;
-  }
-  .card:hover{border-color:rgba(111,140,255,.35); background:#171b26}
-  .card .ico{font-size:19px; margin-bottom:11px; display:block}
-  .card h3{font-size:14.5px; font-weight:700; margin-bottom:7px; color:#eef1f8}
-  .card p{font-size:12.8px; color:var(--muted); line-height:1.75}
+  .head .hint{margin-left:auto; font-size:10.5px; letter-spacing:.26em; text-transform:uppercase; color:#4e5666}
 
-  /* ── 引擎 ── */
-  .engines{display:flex; flex-wrap:wrap; gap:10px}
+  /* 特性：细线清单，无卡片 */
+  .feat{display:grid; grid-template-columns:1fr 1fr; gap:0 72px}
+  @media(max-width:840px){.feat{grid-template-columns:1fr; gap:0}}
+  .item{padding:28px 0; border-top:1px solid var(--line); transition:.4s}
+  .item:hover{border-color:var(--line2)}
+  .item h3{
+    font-size:14.5px; font-weight:700; letter-spacing:.01em; margin-bottom:10px; color:#e9edf6;
+    display:flex; align-items:center; gap:13px;
+  }
+  .item h3 .k{
+    font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--cool);
+    opacity:.7; font-weight:600;
+  }
+  .item p{font-size:13.2px; color:#a5afc4; line-height:1.95; max-width:37ch}
+  .item:hover h3 .k{opacity:1}
+
+  /* 引擎 */
+  .engines{display:flex; flex-wrap:wrap; gap:12px}
   .eng{
-    font-size:12.5px; padding:8px 15px; border-radius:9px; color:#c3cde2;
-    border:1px solid var(--line); background:#12151d;
+    padding:14px 22px; border:1px solid var(--line);
+    font-size:12.5px; letter-spacing:.08em; color:#c3cde0; transition:.35s;
+    background:rgba(255,255,255,.012);
   }
-  .eng span{color:#7f8ba4; font-size:11.5px; margin-left:7px}
+  .eng:hover{border-color:rgba(190,215,255,.42); color:#fff; background:rgba(134,171,223,.07)}
+  .eng span{color:#4e5666; font-size:10.5px; margin-left:11px; letter-spacing:.06em}
 
-  /* ── 页脚 ── */
-  footer{
-    margin-top:96px; padding:34px 0 54px; border-top:1px solid var(--line);
-    color:#5d6679; font-size:12.2px; line-height:1.9;
+  /* 步骤 */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line)}
+  @media(max-width:840px){.steps{grid-template-columns:1fr}}
+  .step{padding:34px 28px; background:rgba(3,5,10,.72); transition:.4s; backdrop-filter:blur(2px)}
+  .step:hover{background:rgba(255,255,255,.032)}
+  .step .n{
+    font-size:11px; letter-spacing:.3em; color:transparent; -webkit-text-stroke:1px rgba(190,215,255,.5);
+    display:block; margin-bottom:22px; font-weight:700;
   }
-  footer a{color:#8f9bb5; border-bottom:1px solid rgba(143,155,181,.25)}
-  footer a:hover{color:#c9d4ea}
-  .warn{color:#7a6552; margin-top:10px}
+  .step h3{font-size:13.5px; font-weight:700; margin-bottom:10px; color:#e9edf6; letter-spacing:.01em}
+  .step p{font-size:12.8px; color:var(--dim); line-height:1.95}
+
+  code{
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; font-size:.88em;
+    color:#c9d4ea; background:rgba(255,255,255,.055); padding:1px 6px;
+  }
+  kbd{
+    font-family:ui-monospace,Consolas,monospace; font-size:.85em; padding:1px 6px;
+    border:1px solid var(--line2); color:#d5dcec;
+  }
+
+  /* ══ 页脚 ═════════════════════════════════════ */
+  footer{
+    margin-top:140px; padding:46px 0 74px; border-top:1px solid var(--line);
+    font-size:12px; color:#4e5666; line-height:2;
+  }
+  footer .frow{display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center; margin-bottom:20px}
+  footer .brand{font-size:11px; font-weight:700; letter-spacing:.34em; text-transform:uppercase; color:#9aa5bb}
+  footer .brand::after{content:""; display:inline-block; width:34px; height:1px; background:var(--line2);
+    vertical-align:middle; margin-left:14px}
+  footer a{color:#8b95ab; transition:.25s}
+  footer a:hover{color:#e6ecf8}
+  .warn{color:#7e6c58; margin-top:14px; max-width:64ch}
+
+  /* 窄屏：宽字距的标识组合会撑破容器，这里收一收 */
+  @media(max-width:660px){
+    .wrap{padding:0 22px}
+    .hero{padding:84px 0 112px; min-height:auto}
+    .mark{font-size:9px; letter-spacing:.26em; flex-wrap:wrap; gap:10px; margin-bottom:30px}
+    .mark::before,.mark::after,.mark i{display:none}
+    h1{font-size:clamp(42px,13.5vw,64px); letter-spacing:-.03em}
+    .lede{font-size:14.5px; margin-top:28px}
+    .meta{font-size:10.5px; letter-spacing:.14em; gap:8px 20px}
+    .cta{gap:22px; margin-top:40px}
+    .btn{padding:14px 26px; font-size:12px; letter-spacing:.1em}
+    .scroll{display:none}
+    .shot .cap{padding:26px 16px 14px; gap:8px}
+    .feat{gap:0}
+    .item{padding:24px 0}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important}
+    .shot img{filter:saturate(.8) brightness(.94)}
+  }
 </style>
 </head>
 <body>
+
+<div class="bg"></div>
+<div class="fog"><i></i><i></i><i></i></div>
+<div class="bokeh" id="bokeh"></div>
+<div class="vig"></div>
+<div class="grain"></div>
+
 <div class="wrap">
 
-  <header>
-    <span class="sakura">🌸</span>
+  <header class="hero">
+    <div class="mark"><b>SakuraView</b><i></i>Static Gallery Generator</div>
+
     <h1>SakuraView</h1>
-    <p class="tagline">
+
+    <p class="lede">
       把 Galgame 的 CG 从各家引擎的打包文件里解出来，<br>
-      生成<b>零依赖、双击即看</b>的静态图库。
+      生成<b>零依赖、双击即看</b>的静态图库。<br>
+      没有服务器，没有构建流程，<em>只有一个文件夹</em>。
     </p>
-    <div class="badges">
-      <span class="badge">纯 file:// 可用</span>
-      <span class="badge">无 Node / 无构建</span>
-      <span class="badge">单库十万张</span>
-      <span class="badge hot">示例素材全部程序合成</span>
+
+    <div class="meta">
+      <span>file:// 直接可用</span>
+      <span>单库十万张</span>
+      <span>素材全部合成</span>
     </div>
+
     <div class="cta">
-      <a class="btn primary" href="demo/CG/index.html">进入示例库 →</a>
-      <a class="btn ghost" href="https://github.com/hongcheng343432121/SakuraView">GitHub 源码</a>
+      <a class="btn" href="demo/CG/index.html">进入示例库 <span class="arw">→</span></a>
+      <a class="link" href="https://github.com/hongcheng343432121/SakuraView">GitHub 源码</a>
     </div>
+
+    <div class="scroll">Scroll</div>
   </header>
 
-  <div class="shots">
+  <div class="rule"></div>
+
+  <section class="shots">
     <a class="shot" href="demo/CG/index.html">
       <img src="docs/screenshots/01-index.png" alt="目录页：按分类分组，卡片带缩略图">
-      <div class="cap"><span class="dot"></span><b>目录页</b> · 分类色块 + 分组卡片 + 按组名搜索</div>
+      <div class="cap"><b>目录页</b><i>分类色块 · 分组卡片 · 按组名搜索</i></div>
     </a>
-    <div class="row2">
+    <div class="duo">
       <a class="shot" href="demo/CG/p01.html">
         <img src="docs/screenshots/02-group.png" alt="分组页：图片网格">
-        <div class="cap"><span class="dot"></span><b>分组页</b> · 横/竖/视频筛选 + 批量框选</div>
+        <div class="cap"><b>分组页</b><i>横 / 竖 / 视频筛选 · 批量框选</i></div>
       </a>
       <a class="shot" href="demo/CG/p08.html">
         <img src="docs/screenshots/03-video.png" alt="视频页：自制播放器">
-        <div class="cap"><span class="dot"></span><b>视频页</b> · 倍速 / 循环 / 连播 / 雪碧图预览</div>
+        <div class="cap"><b>视频页</b><i>倍速 · 循环 · 雪碧图预览</i></div>
       </a>
     </div>
-  </div>
+  </section>
 
   <section>
-    <h2>它做什么</h2>
-    <div class="grid">
-      <div class="card">
-        <span class="ico">🔓</span>
-        <h3>解包</h3>
-        <p>Ren'Py 的 <code>.rpa</code>、QLIE 的 <code>FilePackVer3.0/3.1</code>、Godot 的 <code>.pck</code> 都能直接解，Unity 走 AssetStudio 导出纹理。</p>
+    <div class="head">
+      <span class="num">01</span>
+      <h2>它做什么</h2>
+      <span class="hint">解包 → 整理 → 建站</span>
+    </div>
+    <div class="feat">
+      <div class="item">
+        <h3><span class="k">Extract</span>解包</h3>
+        <p>Ren'Py 的 <code>.rpa</code>、QLIE 的 <code>FilePackVer3.0/3.1</code>、Godot 的 <code>.pck</code> 直接解，Unity 走 AssetStudio 导出纹理。</p>
       </div>
-      <div class="card">
-        <span class="ico">🗂️</span>
-        <h3>整理</h3>
-        <p>按目录名自动归类成「事件CG / 立绘 / 头像 / 动画」；一个都认不出时按「目录即分类」兜底，不会一张图都收不到。</p>
+      <div class="item">
+        <h3><span class="k">Organize</span>整理</h3>
+        <p>按目录名归成「事件CG / 立绘 / 头像 / 动画」；一个都认不出时按「目录即分类」兜底，不会一张图都收不到。</p>
       </div>
-      <div class="card">
-        <span class="ico">🖼️</span>
-        <h3>看图</h3>
-        <p>灯箱 → 真全屏，滚轮/双指缩放、拖拽平移、<kbd>R</kbd> 旋转，<b>每张图的缩放按图记忆</b>，退出后自动滚回那一张。</p>
+      <div class="item">
+        <h3><span class="k">View</span>看图</h3>
+        <p>灯箱进真全屏，滚轮与双指缩放、拖拽平移、<kbd>R</kbd> 旋转。每张图的缩放按图记忆，退出后自动滚回那一张。</p>
       </div>
-      <div class="card">
-        <span class="ico">⭐</span>
-        <h3>收藏与备注</h3>
-        <p>收藏倒序、行内备注（支持 <code>**粗体**</code> / <code>#标签</code>）、轻量标签、导出导入 JSON 备份。</p>
+      <div class="item">
+        <h3><span class="k">Curate</span>收藏与备注</h3>
+        <p>收藏倒序、行内备注支持 <code>**粗体**</code> 与 <code>#标签</code>，标签并入侧栏过滤，一键导出导入 JSON 备份。</p>
       </div>
-      <div class="card">
-        <span class="ico">🎬</span>
-        <h3>视频</h3>
+      <div class="item">
+        <h3><span class="k">Play</span>视频</h3>
         <p>自制播放器：倍速、循环、连播、音量滑块、画中画、播放位置记忆，进度条用预生成的雪碧图做预览。</p>
       </div>
-      <div class="card">
-        <span class="ico">⚡</span>
-        <h3>增量重建</h3>
+      <div class="item">
+        <h3><span class="k">Rebuild</span>增量重建</h3>
         <p>按 CG 目录指纹判断，没变的库直接跳过；全部没变化时 0.6 秒返回。自检脚本一次查完裂图、缩略图、海报帧。</p>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>支持的引擎</h2>
+    <div class="head">
+      <span class="num">02</span>
+      <h2>支持的引擎</h2>
+    </div>
     <div class="engines">
       <div class="eng">Ren'Py<span>.rpa</span></div>
       <div class="eng">QLIE<span>FilePackVer 3.0 / 3.1</span></div>
@@ -196,37 +391,83 @@
   </section>
 
   <section>
-    <h2>怎么用</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>① 装 Python 3.11+</h3>
+    <div class="head">
+      <span class="num">03</span>
+      <h2>怎么用</h2>
+      <span class="hint">三步</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="n">STEP 01</span>
+        <h3>装 Python 3.11+</h3>
         <p>安装时勾选 <b>Add python.exe to PATH</b>。还没打包成 exe，脚本会自己检查并提示。</p>
       </div>
-      <div class="card">
-        <h3>② 把游戏文件夹拖到 一键处理.bat</h3>
-        <p>识别引擎 → 解包 → 整理 → 建站 → 转视频/抽海报/生成缩略图 → 登记总收藏 → 打开浏览器，一条龙。</p>
+      <div class="step">
+        <span class="n">STEP 02</span>
+        <h3>拖进 一键处理.bat</h3>
+        <p>识别引擎 → 解包 → 整理 → 建站 → 转视频抽海报 → 登记总收藏 → 打开浏览器，一条龙。</p>
       </div>
-      <div class="card">
-        <h3>③ 等它跑完</h3>
-        <p>产物是 <code>CG\index.html</code>，直接双击。之后往目录里加删图片，用 <code>rebuild_all.py</code> 增量重建。</p>
+      <div class="step">
+        <span class="n">STEP 03</span>
+        <h3>双击 index.html</h3>
+        <p>产物是 <code>CG\index.html</code>。之后往目录里加删图片，用 <code>rebuild_all.py</code> 增量重建。</p>
       </div>
     </div>
   </section>
 
   <footer>
-    <p>
-      示例库的每一张图都是 <code>make_demo.py</code> 用 Pillow 现画的，两段动画是 ffmpeg 现合成的，
-      不含任何商业游戏素材。
+    <div class="frow">
+      <span class="brand">SakuraView</span>
+      <a href="https://github.com/hongcheng343432121/SakuraView">GitHub</a>
+      <a href="https://github.com/hongcheng343432121/SakuraView/blob/main/LICENSE">MIT License</a>
+    </div>
+    <p style="max-width:66ch">
+      示例库的每一张图都是 <code>make_demo.py</code> 用 Pillow 现画的，两段动画由 ffmpeg 现合成，不含任何商业游戏素材。
     </p>
     <p class="warn">
       本工具不内置任何游戏密钥，也不分发第三方解包器。请仅对自己合法持有的游戏使用，提取出的素材请勿传播或商用。
     </p>
-    <p style="margin-top:14px">
-      <a href="https://github.com/hongcheng343432121/SakuraView">GitHub</a> ·
-      <a href="https://github.com/hongcheng343432121/SakuraView/blob/main/LICENSE">MIT License</a>
-    </p>
   </footer>
 
 </div>
+
+<script>
+  /* 光斑：远景密集小点（吊灯串）+ 近景大光斑，纯 DOM 生成，数量按屏幕宽度收敛 */
+  (function () {
+    var box = document.getElementById('bokeh');
+    if (!box) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var W = window.innerWidth, H = window.innerHeight;
+    var small = W < 720;
+    var nSmall = small ? 26 : 58;      // 远景小点
+    var nBig = small ? 4 : 9;          // 近景大光斑
+    var pal = [
+      'rgba(255,205,150,',   // 暖烛光
+      'rgba(255,225,190,',   // 米白
+      'rgba(170,200,245,',   // 冷吊灯
+      'rgba(230,160,120,'    // 暗橙
+    ];
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function add(size, blur, alpha, palIdx, dur) {
+      var el = document.createElement('i');
+      var s = size;
+      el.style.width = s + 'px';
+      el.style.height = s + 'px';
+      el.style.left = rnd(-4, 100) + '%';
+      el.style.top = rnd(4, 96) + '%';
+      /* 用径向渐变代替实色圆：边缘天然柔和，不会有"脏点"的硬边 */
+      el.style.background = 'radial-gradient(closest-side, ' + pal[palIdx] + rnd(alpha * .9, alpha) +
+                            ') 0%, ' + pal[palIdx] + (alpha * .35).toFixed(2) + ') 42%, transparent 100%)';
+      el.style.filter = 'blur(' + blur + 'px)';
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay = '-' + rnd(0, dur) + 's';
+      box.appendChild(el);
+    }
+    if (!reduce) {
+      for (var i = 0; i < nSmall; i++) add(rnd(2, 7), rnd(1, 3), .55, Math.floor(rnd(0, 4)), rnd(16, 34));
+      for (var j = 0; j < nBig; j++) add(rnd(50, 130), rnd(18, 42), .12, Math.floor(rnd(0, 4)), rnd(26, 48));
+    }
+  })();
+</script>
 </body>
 </html>
